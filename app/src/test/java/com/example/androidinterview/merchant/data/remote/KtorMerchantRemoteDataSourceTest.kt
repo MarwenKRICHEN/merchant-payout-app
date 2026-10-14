@@ -3,6 +3,7 @@ package com.example.androidinterview.merchant.data.remote
 import com.example.androidinterview.core.network.ApiErrorDto
 import com.example.androidinterview.core.network.HttpException
 import com.example.androidinterview.core.network.createHttpClient
+import com.example.androidinterview.merchant.data.remote.dto.PaginatedActivityResponseDto
 import com.example.androidinterview.mock.MockDispatcher
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.MockRequestHandleScope
@@ -74,6 +75,60 @@ class KtorMerchantRemoteDataSourceTest {
         assertTrue(exception is SerializationException)
     }
 
+    @Test
+    fun `getActivity without arguments sends no query parameters`() = runTest {
+        val dataSource = dataSource { json("""{"items":[],"next_cursor":null,"has_more":false}""") }
+
+        val response = dataSource.getActivity()
+
+        assertEquals(PaginatedActivityResponseDto(emptyList(), nextCursor = null, hasMore = false), response)
+        val request = requests.single()
+        assertEquals(HttpMethod.Get, request.method)
+        assertEquals("/api/merchant/activity", request.url.encodedPath)
+        assertTrue(request.url.parameters.isEmpty())
+    }
+
+    @Test
+    fun `getActivity sends cursor and limit and decodes the page`() = runTest {
+        val dataSource = dataSource { json(ACTIVITY_PAGE_FIXTURE) }
+
+        val response = dataSource.getActivity(cursor = "act_015", limit = 10)
+
+        val url = requests.single().url
+        assertEquals("act_015", url.parameters["cursor"])
+        assertEquals("10", url.parameters["limit"])
+        assertEquals(listOf("act_016"), response.items.map { it.id })
+        assertEquals("act_016", response.nextCursor)
+        assertTrue(response.hasMore)
+    }
+
+    /** Runs against the app's own mock server to prove the pagination contract end to end. */
+    @Test
+    fun `walks every activity page served by the app mock server`() = runTest {
+        val server = MockWebServer().apply {
+            dispatcher = MockDispatcher()
+            start()
+        }
+        try {
+            val dataSource = KtorMerchantRemoteDataSource(
+                createHttpClient(baseUrl = { server.url("/").toString() }),
+            )
+
+            val first = dataSource.getActivity()
+            val second = dataSource.getActivity(cursor = first.nextCursor)
+
+            assertEquals(15, first.items.size)
+            assertEquals("act_015", first.nextCursor)
+            assertTrue(first.hasMore)
+            assertEquals(15, second.items.size)
+            assertEquals("act_016", second.items.first().id)
+            assertEquals(null, second.nextCursor)
+            assertEquals(false, second.hasMore)
+        } finally {
+            server.shutdown()
+        }
+    }
+
     /** Runs against the app's own mock server to prove the DTOs match its real payload. */
     @Test
     fun `decodes the payload served by the app mock server`() = runTest {
@@ -97,6 +152,25 @@ class KtorMerchantRemoteDataSourceTest {
     }
 
     private companion object {
+        /** A one-item page with more pages after it. */
+        val ACTIVITY_PAGE_FIXTURE = """
+            {
+              "items": [
+                {
+                  "id": "act_016",
+                  "type": "fee",
+                  "amount": -2500,
+                  "currency": "GBP",
+                  "date": "2026-05-03T08:00:00.000Z",
+                  "description": "Monthly service fee",
+                  "status": "pending"
+                }
+              ],
+              "next_cursor": "act_016",
+              "has_more": true
+            }
+        """.trimIndent()
+
         /** Copy of `app/android/fixtures/merchant.json`. */
         val MERCHANT_FIXTURE = """
             {

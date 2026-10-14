@@ -5,15 +5,26 @@ import com.example.androidinterview.merchant.data.remote.dto.ActivityStatusDto
 import com.example.androidinterview.merchant.data.remote.dto.ActivityTypeDto
 import com.example.androidinterview.merchant.data.remote.dto.CurrencyDto
 import com.example.androidinterview.merchant.data.remote.dto.MerchantDataResponseDto
+import com.example.androidinterview.merchant.data.remote.dto.PaginatedActivityResponseDto
 
-/** In-memory [MerchantRemoteDataSource]: returns [response], or throws [error] when set. */
+/**
+ * In-memory [MerchantRemoteDataSource]: returns [response] / [activityResponse], or throws [error] when set.
+ *
+ * @param response Returned by [getMerchant].
+ * @param activityResponse Returned by [getActivity].
+ * @param error Thrown by every call when set.
+ */
 class FakeMerchantRemoteDataSource(
     var response: MerchantDataResponseDto = sampleResponse(),
+    var activityResponse: PaginatedActivityResponseDto = sampleActivityResponse(),
     var error: Throwable? = null,
 ) : MerchantRemoteDataSource {
 
     var callCount = 0
         private set
+
+    /** Arguments of every [getActivity] call, in order. */
+    val activityRequests = mutableListOf<Pair<String?, Int?>>()
 
     override suspend fun getMerchant(): MerchantDataResponseDto {
         callCount++
@@ -21,7 +32,20 @@ class FakeMerchantRemoteDataSource(
         return response
     }
 
+    override suspend fun getActivity(cursor: String?, limit: Int?): PaginatedActivityResponseDto {
+        activityRequests += cursor to limit
+        error?.let { throw it }
+        return activityResponse
+    }
+
     companion object {
+        /** A page made of the sample activity, with more pages after it. */
+        fun sampleActivityResponse() = PaginatedActivityResponseDto(
+            items = sampleResponse().activity,
+            nextCursor = "act_003",
+            hasMore = true,
+        )
+
         /** Same values as `app/android/fixtures/merchant.json`. */
         fun sampleResponse() = MerchantDataResponseDto(
             availableBalance = 500000,

@@ -1,6 +1,7 @@
 package com.example.androidinterview.core.network
 
 import io.ktor.client.HttpClient
+import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
@@ -15,12 +16,17 @@ import kotlinx.coroutines.withContext
  * the base URL (`MockServerManager.baseUrl`) does a host-name lookup, which Android forbids on
  * the main thread (`NetworkOnMainThreadException`).
  *
+ * @param path Path relative to the base URL.
+ * @param block Extra request configuration, e.g. query parameters.
  * @throws java.io.IOException on network failure
  * @throws HttpException on a non-2xx response
  * @throws kotlinx.serialization.SerializationException on an unexpected payload
  */
-suspend inline fun <reified T> HttpClient.getJson(path: String): T {
-    val body = withContext(Dispatchers.IO) { get(path).successBodyOrThrow() }
+suspend inline fun <reified T> HttpClient.getJson(
+    path: String,
+    crossinline block: HttpRequestBuilder.() -> Unit = {},
+): T {
+    val body = withContext(Dispatchers.IO) { get(path) { block() }.successBodyOrThrow() }
     return NetworkJson.decodeFromString<T>(body)
 }
 

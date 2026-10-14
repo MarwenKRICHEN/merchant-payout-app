@@ -13,6 +13,7 @@ import com.example.androidinterview.merchant.domain.model.Money
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.SerializationException
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 import java.io.IOException
 import java.time.Instant
@@ -80,5 +81,41 @@ class DefaultMerchantRepositoryTest {
         remote.response = sample.copy(activity = listOf(sample.activity[0].copy(date = "not-a-date")))
 
         assertEquals(DataResult.Failure(DataError.Unknown), repository.getMerchant())
+    }
+
+    @Test
+    fun `activity page forwards the arguments and keeps the cursor while more pages exist`() = runTest {
+        val result = repository.getActivityPage(cursor = "act_015", limit = 10)
+
+        val page = (result as DataResult.Success).data
+        assertEquals(listOf("act_015" to 10), remote.activityRequests)
+        assertEquals(listOf("act_001", "act_002", "act_003"), page.items.map { it.id })
+        assertEquals("act_003", page.nextCursor)
+    }
+
+    @Test
+    fun `activity page drops the cursor on the last page`() = runTest {
+        remote.activityResponse = FakeMerchantRemoteDataSource.sampleActivityResponse()
+            .copy(nextCursor = "act_003", hasMore = false)
+
+        val page = (repository.getActivityPage() as DataResult.Success).data
+
+        assertEquals(listOf<Pair<String?, Int?>>(null to null), remote.activityRequests)
+        assertNull(page.nextCursor)
+    }
+
+    @Test
+    fun `activity page maps failures like getMerchant`() = runTest {
+        remote.error = IOException("offline")
+        assertEquals(DataResult.Failure(DataError.Network), repository.getActivityPage())
+
+        remote.error = HttpException(503, ApiErrorDto("Service unavailable", "SERVICE_UNAVAILABLE"))
+        assertEquals(
+            DataResult.Failure(DataError.Server(503, "SERVICE_UNAVAILABLE")),
+            repository.getActivityPage(),
+        )
+
+        remote.error = SerializationException("bad payload")
+        assertEquals(DataResult.Failure(DataError.Unknown), repository.getActivityPage())
     }
 }
