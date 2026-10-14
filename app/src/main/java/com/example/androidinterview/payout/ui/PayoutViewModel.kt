@@ -4,10 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.androidinterview.money.Currency
 import com.example.androidinterview.payout.domain.AmountParser
+import com.example.androidinterview.payout.domain.CreatePayoutUseCase
 import com.example.androidinterview.payout.domain.IbanValidator
-import com.example.androidinterview.payout.domain.PayoutRepository
 import com.example.androidinterview.payout.domain.model.PayoutError
-import com.example.androidinterview.payout.domain.model.PayoutRequest
 import com.example.androidinterview.payout.domain.model.PayoutResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,13 +22,13 @@ private const val MAX_AMOUNT_DECIMALS = 2
 /**
  * Drives the payout flow: form editing, confirmation, submission and its outcome.
  *
- * @param repository Creates the payout.
+ * @param createPayout Sends the payout with the device identity.
  * @param ibanValidator Normalises and validates the destination IBAN.
  * @param amountParser Turns the amount typed by the user into money.
  */
 @HiltViewModel
 class PayoutViewModel @Inject constructor(
-    private val repository: PayoutRepository,
+    private val createPayout: CreatePayoutUseCase,
     private val ibanValidator: IbanValidator,
     private val amountParser: AmountParser,
 ) : ViewModel() {
@@ -104,7 +103,7 @@ class PayoutViewModel @Inject constructor(
         if (confirmation.isSubmitting) return
         _uiState.value = editing.copy(confirmation = confirmation.copy(isSubmitting = true))
         viewModelScope.launch {
-            val result = repository.createPayout(PayoutRequest(confirmation.amount, confirmation.iban))
+            val result = createPayout(confirmation.amount, confirmation.iban)
             _uiState.value = when (result) {
                 is PayoutResult.Success -> PayoutUiState.Completed(confirmation.amount)
                 is PayoutResult.Failure -> PayoutUiState.Failed(editing.form, result.error.toReason())

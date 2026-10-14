@@ -9,14 +9,14 @@ import kotlinx.serialization.Serializable
  * @param amount Amount in the lowest denomination (pence / cents).
  * @param currency Currency of [amount], serialized as `GBP` / `EUR`.
  * @param iban Destination IBAN.
- * @param deviceId Stable device identifier; not sent when null.
+ * @param deviceId Stable identifier of the device sending the payout.
  */
 @Serializable
 data class CreatePayoutRequestDto(
     val amount: Long,
     val currency: String,
     val iban: String,
-    @SerialName("device_id") val deviceId: String? = null,
+    @SerialName("device_id") val deviceId: String,
 )
 
 /**

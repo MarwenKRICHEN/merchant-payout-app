@@ -20,6 +20,7 @@ internal fun PayoutRequest.toDto() = CreatePayoutRequestDto(
     amount = amount.minorUnits,
     currency = amount.currency.name,
     iban = iban,
+    deviceId = deviceId,
 )
 
 /** Maps the API response to the domain model; an unknown status or currency is an unexpected payload. */

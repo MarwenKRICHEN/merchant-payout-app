@@ -2,7 +2,11 @@ package com.example.androidinterview.payout.ui
 
 import com.example.androidinterview.money.Currency
 import com.example.androidinterview.money.Money
+import com.example.androidinterview.core.result.DataError
+import com.example.androidinterview.core.result.DataResult
+import com.example.androidinterview.device.domain.FakeDeviceRepository
 import com.example.androidinterview.payout.domain.AmountParser
+import com.example.androidinterview.payout.domain.CreatePayoutUseCase
 import com.example.androidinterview.payout.domain.FakePayoutRepository
 import com.example.androidinterview.payout.domain.IbanValidator
 import com.example.androidinterview.payout.domain.model.Payout
@@ -36,7 +40,12 @@ class PayoutViewModelTest {
     )
 
     private val repository = FakePayoutRepository(PayoutResult.Success(payout))
-    private val viewModel = PayoutViewModel(repository, IbanValidator(), AmountParser())
+    private val deviceRepository = FakeDeviceRepository()
+    private val viewModel = PayoutViewModel(
+        CreatePayoutUseCase(repository, deviceRepository),
+        IbanValidator(),
+        AmountParser(),
+    )
 
     private val state get() = viewModel.uiState.value
     private val editing get() = state as PayoutUiState.Editing
@@ -146,7 +155,7 @@ class PayoutViewModelTest {
 
         viewModel.onSubmitClick()
 
-        assertEquals(listOf(PayoutRequest(Money(40000, Currency.GBP), validIban)), repository.requests)
+        assertEquals(listOf(PayoutRequest(Money(40000, Currency.GBP), validIban, "device_1")), repository.requests)
         assertEquals(PayoutUiState.Completed(Money(40000, Currency.GBP)), state)
     }
 
@@ -202,7 +211,7 @@ class PayoutViewModelTest {
         )
         cases.forEach { (error, reason) ->
             val vm = PayoutViewModel(
-                FakePayoutRepository(PayoutResult.Failure(error)),
+                CreatePayoutUseCase(FakePayoutRepository(PayoutResult.Failure(error)), FakeDeviceRepository()),
                 IbanValidator(),
                 AmountParser(),
             )
@@ -214,6 +223,18 @@ class PayoutViewModelTest {
 
             assertEquals(reason, (vm.uiState.value as PayoutUiState.Failed).reason)
         }
+    }
+
+    @Test
+    fun `a device id failure shows the network reason and sends no payout`() {
+        deviceRepository.result = DataResult.Failure(DataError.Network)
+        fillValidForm()
+        viewModel.onConfirmClick()
+
+        viewModel.onSubmitClick()
+
+        assertEquals(PayoutUiState.Failed.Reason.Network, (state as PayoutUiState.Failed).reason)
+        assertTrue(repository.requests.isEmpty())
     }
 
     @Test
