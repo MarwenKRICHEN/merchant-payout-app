@@ -9,3 +9,7 @@ data object HomeDestination
 /** Full list of the merchant's activity, shown on top of [HomeDestination]. */
 @Serializable
 data object ActivityDestination
+
+/** Form to send a payout to a bank account, and its outcome. */
+@Serializable
+data object PayoutDestination
