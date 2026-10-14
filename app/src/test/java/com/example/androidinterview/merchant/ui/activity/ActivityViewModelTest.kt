@@ -7,9 +7,13 @@ import com.example.androidinterview.merchant.domain.model.Activity
 import com.example.androidinterview.merchant.domain.model.ActivityPage
 import com.example.androidinterview.merchant.domain.model.ActivityStatus
 import com.example.androidinterview.merchant.domain.model.ActivityType
-import com.example.androidinterview.merchant.domain.model.Currency
-import com.example.androidinterview.merchant.domain.model.Money
+import com.example.androidinterview.money.Currency
+import com.example.androidinterview.money.Money
 import com.example.androidinterview.testutil.MainDispatcherRule
+import java.time.Clock
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
@@ -17,10 +21,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
-import java.time.Clock
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
 
 class ActivityViewModelTest {
 

@@ -1,4 +1,4 @@
-package com.example.androidinterview.merchant.domain.model
+package com.example.androidinterview.money
 
 /** Currencies a merchant account or payout can use. */
 enum class Currency { GBP, EUR }

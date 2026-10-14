@@ -29,4 +29,30 @@
 
     <string name="error_network">Check your connection and try again</string>
     <string name="error_unexpected">Something went wrong. Please try again</string>
+
+    <string name="nav_home">Home</string>
+    <string name="nav_payouts">Payouts</string>
+
+    <string name="payout_title">Send Payout</string>
+    <string name="payout_result_title">Payout</string>
+    <string name="payout_amount">Amount</string>
+    <string name="payout_amount_placeholder">0.00</string>
+    <string name="payout_currency">Currency</string>
+    <string name="payout_iban">IBAN</string>
+    <string name="payout_iban_hint">Enter the destination bank account IBAN</string>
+    <string name="payout_iban_invalid">Enter a valid IBAN</string>
+    <string name="payout_confirm">Confirm</string>
+    <string name="payout_cancel">Cancel</string>
+    <string name="payout_confirm_title">Confirm Payout</string>
+    <string name="payout_confirm_amount">Amount:</string>
+    <string name="payout_confirm_currency">Currency:</string>
+    <string name="payout_confirm_iban">IBAN:</string>
+    <string name="payout_sending">Sending payout</string>
+    <string name="payout_completed_title">Payout Completed</string>
+    <string name="payout_completed_message">Your payout of %1$s has been processed successfully.</string>
+    <string name="payout_create_another">Create Another Payout</string>
+    <string name="payout_failed_title">Unable to Process Payout</string>
+    <string name="payout_try_again">Try Again</string>
+    <string name="payout_error_service_unavailable">Service temporarily unavailable. Please try again later.</string>
+    <string name="payout_error_insufficient_funds">Insufficient funds.</string>
 </resources>

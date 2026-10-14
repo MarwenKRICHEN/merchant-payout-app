@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.androidinterview.merchant.domain.model.ActivityStatus
 import com.example.androidinterview.merchant.domain.model.ActivityType
-import com.example.androidinterview.merchant.domain.model.Currency
-import com.example.androidinterview.merchant.domain.model.Money
+import com.example.androidinterview.money.Currency
+import com.example.androidinterview.money.Money
 import com.example.androidinterview.ui.theme.AndroidInterviewTheme
 import java.time.LocalDate
 

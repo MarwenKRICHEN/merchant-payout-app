@@ -17,13 +17,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.androidinterview.R
-import com.example.androidinterview.core.format.format
 import com.example.androidinterview.core.format.formatShort
 import com.example.androidinterview.merchant.domain.model.ActivityStatus
 import com.example.androidinterview.merchant.domain.model.ActivityType
-import com.example.androidinterview.merchant.domain.model.Currency
-import com.example.androidinterview.merchant.domain.model.Money
 import com.example.androidinterview.merchant.ui.activity.ActivityItemUi
+import com.example.androidinterview.money.Currency
+import com.example.androidinterview.money.Money
+import com.example.androidinterview.money.format
 import com.example.androidinterview.ui.theme.AndroidInterviewTheme
 import com.example.androidinterview.ui.theme.Green
 import com.example.androidinterview.ui.theme.Red
