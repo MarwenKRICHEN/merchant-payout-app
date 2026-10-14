@@ -33,10 +33,10 @@ class KtorPayoutRemoteDataSourceTest {
             ),
         )
 
-    private val request = CreatePayoutRequestDto(40000, "GBP", "GB29NWBK60161331926819")
+    private val request = CreatePayoutRequestDto(40000, "GBP", "GB29NWBK60161331926819", "device_1")
 
     @Test
-    fun `createPayout posts the JSON body without a null device id and decodes the answer`() = runTest {
+    fun `createPayout posts the JSON body with the device id and decodes the answer`() = runTest {
         val dataSource = dataSource(
             """
             {"id":"pay_001","status":"pending","amount":40000,"currency":"GBP",
@@ -61,20 +61,9 @@ class KtorPayoutRemoteDataSourceTest {
         assertEquals(HttpMethod.Post, sent.method)
         assertEquals("/api/payouts", sent.url.encodedPath)
         assertEquals(
-            """{"amount":40000,"currency":"GBP","iban":"GB29NWBK60161331926819"}""",
+            """{"amount":40000,"currency":"GBP","iban":"GB29NWBK60161331926819","device_id":"device_1"}""",
             (sent.body as TextContent).text,
         )
-    }
-
-    @Test
-    fun `device id is sent when present`() = runTest {
-        val dataSource = dataSource(
-            """{"id":"p","status":"pending","amount":1,"currency":"GBP","iban":"x","created_at":"2026-05-18T10:00:00Z"}""",
-        )
-
-        dataSource.createPayout(request.copy(deviceId = "device_1"))
-
-        assertTrue((requests.single().body as TextContent).text.contains(""""device_id":"device_1""""))
     }
 
     @Test

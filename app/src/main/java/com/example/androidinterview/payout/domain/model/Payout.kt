@@ -11,10 +11,12 @@ enum class PayoutStatus { PENDING, PROCESSING, COMPLETED, FAILED }
  *
  * @param amount Amount to send; always positive.
  * @param iban Normalised destination IBAN (no spaces, upper case).
+ * @param deviceId Stable identifier of the device sending the payout.
  */
 data class PayoutRequest(
     val amount: Money,
     val iban: String,
+    val deviceId: String,
 )
 
 /**

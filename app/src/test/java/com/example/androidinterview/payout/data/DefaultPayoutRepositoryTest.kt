@@ -20,7 +20,7 @@ import org.junit.Test
 
 class DefaultPayoutRepositoryTest {
 
-    private val request = PayoutRequest(Money(40000, Currency.GBP), "GB29NWBK60161331926819")
+    private val request = PayoutRequest(Money(40000, Currency.GBP), "GB29NWBK60161331926819", "device_1")
 
     private class FakeRemote(
         private val outcome: () -> PayoutResponseDto,
@@ -49,7 +49,7 @@ class DefaultPayoutRepositoryTest {
         val result = DefaultPayoutRepository(remote).createPayout(request)
 
         assertEquals(
-            listOf(CreatePayoutRequestDto(40000, "GBP", "GB29NWBK60161331926819")),
+            listOf(CreatePayoutRequestDto(40000, "GBP", "GB29NWBK60161331926819", "device_1")),
             remote.requests,
         )
         assertEquals(
