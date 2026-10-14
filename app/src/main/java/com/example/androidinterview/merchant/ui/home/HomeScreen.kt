@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,29 +29,60 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.androidinterview.R
 import com.example.androidinterview.merchant.ui.home.components.ActivityRow
 import com.example.androidinterview.merchant.ui.home.components.BalanceSection
+import kotlinx.coroutines.flow.Flow
 
 /**
- * Stateful entry point of the Home screen: collects the ViewModel state and delegates to [HomeScreen].
+ * Stateful entry point of the Home screen: collects the ViewModel state and events and delegates to
+ * [HomeScreen].
  *
+ * @param onShowActivity Called when the full activity list should be opened.
  * @param modifier Modifier applied to the screen.
  * @param viewModel ViewModel providing the screen state.
  */
 @Composable
 fun HomeRoute(
+    onShowActivity: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    HomeEvents(events = viewModel.events, onShowActivity = onShowActivity)
     HomeScreen(
         state = state,
         onRetry = viewModel::retry,
-        onShowMoreClick = {}, // The full activity list is Step 2.
+        onShowMoreClick = viewModel::onShowMoreClick,
         modifier = modifier,
     )
+}
+
+/**
+ * Runs the ViewModel's one-shot events while the screen is on screen.
+ *
+ * @param events Events emitted by the ViewModel.
+ * @param onShowActivity Called when the full activity list should be opened.
+ */
+@Composable
+private fun HomeEvents(
+    events: Flow<HomeViewModel.Event>,
+    onShowActivity: () -> Unit,
+) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    LaunchedEffect(events) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            events.collect { event ->
+                when (event) {
+                    HomeViewModel.Event.ShowActivity -> onShowActivity()
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -72,7 +104,11 @@ fun HomeScreen(
         when (state) {
             HomeUiState.Loading -> LoadingContent(Modifier.padding(innerPadding))
             is HomeUiState.Error -> ErrorContent(state.reason, onRetry, Modifier.padding(innerPadding))
-            is HomeUiState.Success -> SuccessContent(state, onShowMoreClick, Modifier.padding(innerPadding))
+            is HomeUiState.Success -> SuccessContent(
+                state = state,
+                onShowMoreClick = onShowMoreClick,
+                modifier = Modifier.padding(innerPadding),
+            )
         }
     }
 }

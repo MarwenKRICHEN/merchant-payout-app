@@ -10,6 +10,9 @@ import com.example.androidinterview.merchant.domain.model.Currency
 import com.example.androidinterview.merchant.domain.model.Merchant
 import com.example.androidinterview.merchant.domain.model.Money
 import com.example.androidinterview.testutil.MainDispatcherRule
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -93,5 +96,15 @@ class HomeViewModelTest {
 
         val state = viewModel.uiState.value as HomeUiState.Success
         assertEquals(emptyList<ActivityRowUi>(), state.recentActivity)
+    }
+
+    @Test
+    fun `show more emits a single show activity event`() = runTest {
+        val viewModel = HomeViewModel(FakeMerchantRepository(DataResult.Success(merchant)))
+        val event = async { viewModel.events.first() }
+
+        viewModel.onShowMoreClick()
+
+        assertEquals(HomeViewModel.Event.ShowActivity, event.await())
     }
 }
