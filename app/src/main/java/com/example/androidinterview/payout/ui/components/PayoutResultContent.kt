@@ -39,6 +39,8 @@ import com.example.androidinterview.ui.theme.Red
  * @param actionLabel Label of the single action.
  * @param onAction Called when the user taps the action.
  * @param modifier Modifier applied to the container.
+ * @param secondaryActionLabel Label of an optional action shown above the main one.
+ * @param onSecondaryAction Called when the user taps the secondary action.
  */
 @Composable
 private fun ResultContent(
@@ -49,6 +51,8 @@ private fun ResultContent(
     actionLabel: String,
     onAction: () -> Unit,
     modifier: Modifier = Modifier,
+    secondaryActionLabel: String? = null,
+    onSecondaryAction: () -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -81,6 +85,11 @@ private fun ResultContent(
                 color = if (tint == Green) MaterialTheme.colorScheme.onSurfaceVariant else tint,
                 textAlign = TextAlign.Center,
             )
+        }
+        if (secondaryActionLabel != null) {
+            Button(onClick = onSecondaryAction) {
+                Text(secondaryActionLabel)
+            }
         }
         Button(onClick = onAction) {
             Text(actionLabel)
@@ -118,12 +127,14 @@ fun PayoutCompletedContent(
  *
  * @param reason Why it failed.
  * @param onTryAgain Called when the user wants to go back to the form.
+ * @param onOpenSettings Called when the user wants to set up a biometric, offered when none is.
  * @param modifier Modifier applied to the container.
  */
 @Composable
 fun PayoutFailedContent(
     reason: PayoutUiState.Failed.Reason,
     onTryAgain: () -> Unit,
+    onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     ResultContent(
@@ -134,6 +145,12 @@ fun PayoutFailedContent(
         actionLabel = stringResource(R.string.payout_try_again),
         onAction = onTryAgain,
         modifier = modifier,
+        secondaryActionLabel = if (reason == PayoutUiState.Failed.Reason.BiometricNotEnrolled) {
+            stringResource(R.string.payout_open_settings)
+        } else {
+            null
+        },
+        onSecondaryAction = onOpenSettings,
     )
 }
 
@@ -143,5 +160,10 @@ private fun PayoutUiState.Failed.Reason.message(): String = when (this) {
     PayoutUiState.Failed.Reason.Network -> stringResource(R.string.error_network)
     PayoutUiState.Failed.Reason.ServiceUnavailable -> stringResource(R.string.payout_error_service_unavailable)
     PayoutUiState.Failed.Reason.InsufficientFunds -> stringResource(R.string.payout_error_insufficient_funds)
+    PayoutUiState.Failed.Reason.BiometricCancelled -> stringResource(R.string.payout_error_biometric_cancelled)
+    PayoutUiState.Failed.Reason.BiometricLockedOut -> stringResource(R.string.payout_error_biometric_locked_out)
+    PayoutUiState.Failed.Reason.BiometricNotEnrolled -> stringResource(R.string.payout_error_biometric_not_enrolled)
+    PayoutUiState.Failed.Reason.BiometricUnavailable -> stringResource(R.string.payout_error_biometric_unavailable)
+    PayoutUiState.Failed.Reason.BiometricFailed -> stringResource(R.string.payout_error_biometric_failed)
     PayoutUiState.Failed.Reason.Unexpected -> stringResource(R.string.error_unexpected)
 }

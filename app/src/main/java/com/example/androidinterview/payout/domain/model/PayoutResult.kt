@@ -30,6 +30,21 @@ sealed interface PayoutError {
     /** The payout service is temporarily unavailable. */
     data object ServiceUnavailable : PayoutError
 
+    /** The user dismissed the authentication a large payout requires. */
+    data object AuthenticationCancelled : PayoutError
+
+    /** Authentication is temporarily blocked after too many failed attempts. */
+    data object AuthenticationLockedOut : PayoutError
+
+    /** The device has no biometric enrolled. */
+    data object AuthenticationNotEnrolled : PayoutError
+
+    /** The device cannot authenticate with biometrics. */
+    data object AuthenticationUnavailable : PayoutError
+
+    /** Authentication failed for another reason. */
+    data object AuthenticationFailed : PayoutError
+
     /** Any other failure, including an unexpected payload. */
     data object Unknown : PayoutError
 }

@@ -55,6 +55,12 @@
     <string name="payout_try_again">Try Again</string>
     <string name="payout_error_service_unavailable">Service temporarily unavailable. Please try again later.</string>
     <string name="payout_error_insufficient_funds">Insufficient funds.</string>
+    <string name="payout_error_biometric_cancelled">Biometric authentication was cancelled.</string>
+    <string name="payout_error_biometric_locked_out">Too many attempts. Please try again later.</string>
+    <string name="payout_error_biometric_not_enrolled">Biometric authentication is not set up. Set it up in Settings to send payouts over £1,000.00.</string>
+    <string name="payout_error_biometric_unavailable">Biometric authentication is not available on this device.</string>
+    <string name="payout_error_biometric_failed">Biometric authentication failed.</string>
+    <string name="payout_open_settings">Open Settings</string>
     <string name="biometric_prompt_title">Biometric Authentication</string>
     <string name="biometric_prompt_subtitle">Authenticate to complete the payout</string>
 </resources>
