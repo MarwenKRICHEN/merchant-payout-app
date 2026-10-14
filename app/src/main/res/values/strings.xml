@@ -1,3 +1,18 @@
 <resources>
     <string name="app_name">AndroidInterview</string>
+
+    <string name="home_title">Business Account</string>
+    <string name="home_loading">Loading</string>
+    <string name="home_retry">Retry</string>
+
+    <string name="balance_title">Account Balance</string>
+    <string name="balance_available">Available</string>
+    <string name="balance_pending">Pending</string>
+
+    <string name="activity_title">Recent Activity</string>
+    <string name="activity_empty">No recent activity</string>
+    <string name="activity_show_more">Show More</string>
+
+    <string name="error_network">Check your connection and try again</string>
+    <string name="error_unexpected">Something went wrong. Please try again</string>
 </resources>
