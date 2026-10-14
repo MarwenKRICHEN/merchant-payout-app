@@ -6,17 +6,17 @@ import com.example.androidinterview.merchant.domain.FakeMerchantRepository
 import com.example.androidinterview.merchant.domain.model.Activity
 import com.example.androidinterview.merchant.domain.model.ActivityStatus
 import com.example.androidinterview.merchant.domain.model.ActivityType
-import com.example.androidinterview.merchant.domain.model.Currency
 import com.example.androidinterview.merchant.domain.model.Merchant
-import com.example.androidinterview.merchant.domain.model.Money
+import com.example.androidinterview.money.Currency
+import com.example.androidinterview.money.Money
 import com.example.androidinterview.testutil.MainDispatcherRule
+import java.time.Instant
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
-import java.time.Instant
 
 class HomeViewModelTest {
 

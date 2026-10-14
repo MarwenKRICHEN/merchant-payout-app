@@ -3,7 +3,7 @@ package com.example.androidinterview.merchant.ui.activity
 import androidx.compose.runtime.Stable
 import com.example.androidinterview.merchant.domain.model.ActivityStatus
 import com.example.androidinterview.merchant.domain.model.ActivityType
-import com.example.androidinterview.merchant.domain.model.Money
+import com.example.androidinterview.money.Money
 import java.time.LocalDate
 
 /** What the activity list shows; exactly one of these at a time. */

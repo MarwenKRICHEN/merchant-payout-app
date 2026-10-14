@@ -14,8 +14,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.example.androidinterview.core.format.format
 import com.example.androidinterview.merchant.ui.home.ActivityRowUi
+import com.example.androidinterview.money.format
 import com.example.androidinterview.ui.theme.Green
 import com.example.androidinterview.ui.theme.Red
 

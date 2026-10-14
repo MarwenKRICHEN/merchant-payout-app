@@ -1,7 +1,7 @@
-package com.example.androidinterview.core.format
+package com.example.androidinterview.money
 
-import com.example.androidinterview.merchant.domain.model.Currency
-import com.example.androidinterview.merchant.domain.model.Money
+import com.example.androidinterview.money.Currency
+import com.example.androidinterview.money.Money
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.util.Locale

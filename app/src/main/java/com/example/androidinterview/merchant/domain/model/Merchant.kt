@@ -1,5 +1,7 @@
 package com.example.androidinterview.merchant.domain.model
 
+import com.example.androidinterview.money.Money
+
 /**
  * The merchant's financial overview.
  *

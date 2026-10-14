@@ -1,6 +1,5 @@
-package com.example.androidinterview.core.format
+package com.example.androidinterview.money
 
-import com.example.androidinterview.merchant.domain.model.Money
 import java.math.BigDecimal
 import java.text.NumberFormat
 import java.util.Locale

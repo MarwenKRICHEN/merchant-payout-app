@@ -1,5 +1,6 @@
 package com.example.androidinterview.merchant.domain.model
 
+import com.example.androidinterview.money.Money
 import java.time.Instant
 
 /** Kind of transaction on the account. */

@@ -1,7 +1,7 @@
 package com.example.androidinterview.merchant.ui.home
 
 import androidx.compose.runtime.Stable
-import com.example.androidinterview.merchant.domain.model.Money
+import com.example.androidinterview.money.Money
 
 /** What the Home screen shows; exactly one of these at a time. */
 @Stable

@@ -14,8 +14,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.androidinterview.R
-import com.example.androidinterview.core.format.format
-import com.example.androidinterview.merchant.domain.model.Money
+import com.example.androidinterview.money.Money
+import com.example.androidinterview.money.format
 
 /**
  * Available and pending balances side by side.

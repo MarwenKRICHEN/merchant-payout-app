@@ -8,15 +8,15 @@ import com.example.androidinterview.merchant.data.remote.FakeMerchantRemoteDataS
 import com.example.androidinterview.merchant.domain.model.Activity
 import com.example.androidinterview.merchant.domain.model.ActivityStatus
 import com.example.androidinterview.merchant.domain.model.ActivityType
-import com.example.androidinterview.merchant.domain.model.Currency
-import com.example.androidinterview.merchant.domain.model.Money
+import com.example.androidinterview.money.Currency
+import com.example.androidinterview.money.Money
+import java.io.IOException
+import java.time.Instant
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.SerializationException
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
-import java.io.IOException
-import java.time.Instant
 
 class DefaultMerchantRepositoryTest {
 
