@@ -42,7 +42,7 @@ class PayoutViewModel @Inject constructor(
         data object OpenBiometricSettings : Event
     }
 
-    private val _uiState = MutableStateFlow<PayoutUiState>(PayoutUiState.Editing())
+    private val _uiState = MutableStateFlow(PayoutUiState())
     private val _events = Channel<Event>()
 
     /** One-shot events to collect while the UI is visible. */
@@ -111,23 +111,25 @@ class PayoutViewModel @Inject constructor(
 
     /** The user confirmed: sends the payout. A second tap while in flight is ignored. */
     fun onSubmitClick() {
-        val editing = _uiState.value as? PayoutUiState.Editing ?: return
+        val editing = _uiState.value.content as? PayoutContent.Editing ?: return
         val confirmation = editing.confirmation ?: return
         if (confirmation.isSubmitting) return
-        _uiState.value = editing.copy(confirmation = confirmation.copy(isSubmitting = true))
+        updateContent { editing.copy(confirmation = confirmation.copy(isSubmitting = true)) }
         viewModelScope.launch {
             val result = createPayout(confirmation.amount, confirmation.iban)
-            _uiState.value = when (result) {
-                is PayoutResult.Success -> PayoutUiState.Completed(confirmation.amount)
-                is PayoutResult.Failure -> PayoutUiState.Failed(editing.form, result.error.toReason())
+            updateContent {
+                when (result) {
+                    is PayoutResult.Success -> PayoutContent.Completed(confirmation.amount)
+                    is PayoutResult.Failure -> PayoutContent.Failed(editing.form, result.error.toReason())
+                }
             }
         }
     }
 
     /** The user wants to correct a failed payout: back to the form with the inputs kept. */
     fun onTryAgainClick() {
-        _uiState.update { previous ->
-            if (previous is PayoutUiState.Failed) PayoutUiState.Editing(previous.form) else previous
+        updateContent { previous ->
+            if (previous is PayoutContent.Failed) PayoutContent.Editing(previous.form) else previous
         }
     }
 
@@ -138,14 +140,19 @@ class PayoutViewModel @Inject constructor(
 
     /** The user wants to send another payout: starts from an empty form. */
     fun onCreateAnotherClick() {
-        _uiState.value = PayoutUiState.Editing()
+        updateContent { PayoutContent.Editing() }
     }
 
     /** Applies [transform] when the user is editing the form; the other states have nothing to edit. */
-    private inline fun updateEditing(crossinline transform: (PayoutUiState.Editing) -> PayoutUiState.Editing) {
-        _uiState.update { previous ->
-            if (previous is PayoutUiState.Editing) transform(previous) else previous
+    private inline fun updateEditing(crossinline transform: (PayoutContent.Editing) -> PayoutContent.Editing) {
+        updateContent { previous ->
+            if (previous is PayoutContent.Editing) transform(previous) else previous
         }
+    }
+
+    /** Replaces the content of the screen with [transform] applied to the current one. */
+    private inline fun updateContent(crossinline transform: (PayoutContent) -> PayoutContent) {
+        _uiState.update { previous -> previous.copy(content = transform(previous.content)) }
     }
 
     /** Recomputes [PayoutFormUi.showIbanError] and [PayoutFormUi.isConfirmEnabled] from the inputs. */
@@ -169,14 +176,14 @@ private fun String.isAcceptableAmountInput(): Boolean {
 }
 
 /** Maps the domain error to the reason the payout screen renders. */
-private fun PayoutError.toReason(): PayoutUiState.Failed.Reason = when (this) {
-    PayoutError.Network -> PayoutUiState.Failed.Reason.Network
-    PayoutError.InsufficientFunds -> PayoutUiState.Failed.Reason.InsufficientFunds
-    PayoutError.ServiceUnavailable -> PayoutUiState.Failed.Reason.ServiceUnavailable
-    PayoutError.AuthenticationCancelled -> PayoutUiState.Failed.Reason.BiometricCancelled
-    PayoutError.AuthenticationLockedOut -> PayoutUiState.Failed.Reason.BiometricLockedOut
-    PayoutError.AuthenticationNotEnrolled -> PayoutUiState.Failed.Reason.BiometricNotEnrolled
-    PayoutError.AuthenticationUnavailable -> PayoutUiState.Failed.Reason.BiometricUnavailable
-    PayoutError.AuthenticationFailed -> PayoutUiState.Failed.Reason.BiometricFailed
-    PayoutError.Unknown -> PayoutUiState.Failed.Reason.Unexpected
+private fun PayoutError.toReason(): PayoutContent.Failed.Reason = when (this) {
+    PayoutError.Network -> PayoutContent.Failed.Reason.Network
+    PayoutError.InsufficientFunds -> PayoutContent.Failed.Reason.InsufficientFunds
+    PayoutError.ServiceUnavailable -> PayoutContent.Failed.Reason.ServiceUnavailable
+    PayoutError.AuthenticationCancelled -> PayoutContent.Failed.Reason.BiometricCancelled
+    PayoutError.AuthenticationLockedOut -> PayoutContent.Failed.Reason.BiometricLockedOut
+    PayoutError.AuthenticationNotEnrolled -> PayoutContent.Failed.Reason.BiometricNotEnrolled
+    PayoutError.AuthenticationUnavailable -> PayoutContent.Failed.Reason.BiometricUnavailable
+    PayoutError.AuthenticationFailed -> PayoutContent.Failed.Reason.BiometricFailed
+    PayoutError.Unknown -> PayoutContent.Failed.Reason.Unexpected
 }

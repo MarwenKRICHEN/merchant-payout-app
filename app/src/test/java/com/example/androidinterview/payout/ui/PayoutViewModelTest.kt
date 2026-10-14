@@ -52,8 +52,8 @@ class PayoutViewModelTest {
         AmountParser(),
     )
 
-    private val state get() = viewModel.uiState.value
-    private val editing get() = state as PayoutUiState.Editing
+    private val content get() = viewModel.uiState.value.content
+    private val editing get() = content as PayoutContent.Editing
 
     private fun fillValidForm(amount: String = "400") {
         viewModel.onAmountChange(amount)
@@ -161,7 +161,7 @@ class PayoutViewModelTest {
         viewModel.onSubmitClick()
 
         assertEquals(listOf(PayoutRequest(Money(40000, Currency.GBP), validIban, "device_1")), repository.requests)
-        assertEquals(PayoutUiState.Completed(Money(40000, Currency.GBP)), state)
+        assertEquals(PayoutContent.Completed(Money(40000, Currency.GBP)), content)
     }
 
     @Test
@@ -192,7 +192,7 @@ class PayoutViewModelTest {
         gate.complete(Unit)
 
         assertEquals(1, repository.requests.size)
-        assertTrue(state is PayoutUiState.Completed)
+        assertTrue(content is PayoutContent.Completed)
     }
 
     @Test
@@ -203,16 +203,16 @@ class PayoutViewModelTest {
 
         viewModel.onSubmitClick()
 
-        assertEquals(PayoutUiState.Failed.Reason.InsufficientFunds, (state as PayoutUiState.Failed).reason)
+        assertEquals(PayoutContent.Failed.Reason.InsufficientFunds, (content as PayoutContent.Failed).reason)
     }
 
     @Test
     fun `failures map to the matching reasons`() {
         val cases = mapOf(
-            PayoutError.ServiceUnavailable to PayoutUiState.Failed.Reason.ServiceUnavailable,
-            PayoutError.Network to PayoutUiState.Failed.Reason.Network,
-            PayoutError.InsufficientFunds to PayoutUiState.Failed.Reason.InsufficientFunds,
-            PayoutError.Unknown to PayoutUiState.Failed.Reason.Unexpected,
+            PayoutError.ServiceUnavailable to PayoutContent.Failed.Reason.ServiceUnavailable,
+            PayoutError.Network to PayoutContent.Failed.Reason.Network,
+            PayoutError.InsufficientFunds to PayoutContent.Failed.Reason.InsufficientFunds,
+            PayoutError.Unknown to PayoutContent.Failed.Reason.Unexpected,
         )
         cases.forEach { (error, reason) ->
             val vm = PayoutViewModel(
@@ -230,7 +230,7 @@ class PayoutViewModelTest {
 
             vm.onSubmitClick()
 
-            assertEquals(reason, (vm.uiState.value as PayoutUiState.Failed).reason)
+            assertEquals(reason, (vm.uiState.value.content as PayoutContent.Failed).reason)
         }
     }
 
@@ -242,18 +242,18 @@ class PayoutViewModelTest {
 
         viewModel.onSubmitClick()
 
-        assertEquals(PayoutUiState.Failed.Reason.Network, (state as PayoutUiState.Failed).reason)
+        assertEquals(PayoutContent.Failed.Reason.Network, (content as PayoutContent.Failed).reason)
         assertTrue(repository.requests.isEmpty())
     }
 
     @Test
     fun `a large payout the user did not authenticate fails with the biometric reason and sends nothing`() {
         val cases = mapOf(
-            AuthenticationResult.Cancelled to PayoutUiState.Failed.Reason.BiometricCancelled,
-            AuthenticationResult.LockedOut to PayoutUiState.Failed.Reason.BiometricLockedOut,
-            AuthenticationResult.NotEnrolled to PayoutUiState.Failed.Reason.BiometricNotEnrolled,
-            AuthenticationResult.Unavailable to PayoutUiState.Failed.Reason.BiometricUnavailable,
-            AuthenticationResult.Failed to PayoutUiState.Failed.Reason.BiometricFailed,
+            AuthenticationResult.Cancelled to PayoutContent.Failed.Reason.BiometricCancelled,
+            AuthenticationResult.LockedOut to PayoutContent.Failed.Reason.BiometricLockedOut,
+            AuthenticationResult.NotEnrolled to PayoutContent.Failed.Reason.BiometricNotEnrolled,
+            AuthenticationResult.Unavailable to PayoutContent.Failed.Reason.BiometricUnavailable,
+            AuthenticationResult.Failed to PayoutContent.Failed.Reason.BiometricFailed,
         )
         cases.forEach { (outcome, reason) ->
             authenticationProvider.result = outcome
@@ -263,7 +263,7 @@ class PayoutViewModelTest {
 
             viewModel.onSubmitClick()
 
-            assertEquals(reason, (state as PayoutUiState.Failed).reason)
+            assertEquals(reason, (content as PayoutContent.Failed).reason)
         }
         assertTrue(repository.requests.isEmpty())
     }
@@ -276,7 +276,7 @@ class PayoutViewModelTest {
         viewModel.onSubmitClick()
 
         assertEquals(1, authenticationProvider.calls)
-        assertTrue(state is PayoutUiState.Completed)
+        assertTrue(content is PayoutContent.Completed)
     }
 
     @Test
@@ -293,11 +293,11 @@ class PayoutViewModelTest {
         viewModel.onConfirmClick()
         viewModel.onSubmitClick()
 
-        assertTrue(state is PayoutUiState.Failed)
-        assertEquals("400", (state as PayoutUiState.Failed).form.amountInput)
+        assertTrue(content is PayoutContent.Failed)
+        assertEquals("400", (content as PayoutContent.Failed).form.amountInput)
 
         viewModel.onTryAgainClick()
-        assertTrue(state is PayoutUiState.Editing)
+        assertTrue(content is PayoutContent.Editing)
         assertNull(editing.confirmation)
         assertEquals("400", editing.form.amountInput)
         assertTrue(editing.form.isConfirmEnabled)
@@ -307,6 +307,6 @@ class PayoutViewModelTest {
         viewModel.onSubmitClick()
         viewModel.onCreateAnotherClick()
 
-        assertEquals(PayoutUiState.Editing(), state)
+        assertEquals(PayoutContent.Editing(), content)
     }
 }

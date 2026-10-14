@@ -19,13 +19,13 @@ private val previewForm = PayoutFormUi(
 /**
  * Renders [PayoutScreen] with no-op callbacks.
  *
- * @param state State to render.
+ * @param content Content to render.
  */
 @Composable
-private fun PreviewPayoutScreen(state: PayoutUiState) {
+private fun PreviewPayoutScreen(content: PayoutContent) {
     AndroidInterviewTheme {
         PayoutScreen(
-            state = state,
+            state = PayoutUiState(content),
             onAmountChange = {},
             onCurrencyChange = {},
             onIbanChange = {},
@@ -43,14 +43,14 @@ private fun PreviewPayoutScreen(state: PayoutUiState) {
 @Preview(showBackground = true)
 @Composable
 private fun PayoutScreenEmptyPreview() {
-    PreviewPayoutScreen(PayoutUiState.Editing())
+    PreviewPayoutScreen(PayoutContent.Editing())
 }
 
 /** Preview of a valid form. */
 @Preview(showBackground = true)
 @Composable
 private fun PayoutScreenFilledPreview() {
-    PreviewPayoutScreen(PayoutUiState.Editing(previewForm))
+    PreviewPayoutScreen(PayoutContent.Editing(previewForm))
 }
 
 /** Preview of an invalid IBAN. */
@@ -58,7 +58,7 @@ private fun PayoutScreenFilledPreview() {
 @Composable
 private fun PayoutScreenIbanErrorPreview() {
     PreviewPayoutScreen(
-        PayoutUiState.Editing(
+        PayoutContent.Editing(
             previewForm.copy(
                 ibanInput = "FR1212345123451234567A12310131231231231",
                 showIbanError = true,
@@ -73,7 +73,7 @@ private fun PayoutScreenIbanErrorPreview() {
 @Composable
 private fun PayoutScreenConfirmingPreview() {
     PreviewPayoutScreen(
-        PayoutUiState.Editing(
+        PayoutContent.Editing(
             form = previewForm,
             confirmation = ConfirmationUi(Money(40000, Currency.GBP), PREVIEW_IBAN),
         ),
@@ -85,7 +85,7 @@ private fun PayoutScreenConfirmingPreview() {
 @Composable
 private fun PayoutScreenSubmittingPreview() {
     PreviewPayoutScreen(
-        PayoutUiState.Editing(
+        PayoutContent.Editing(
             form = previewForm,
             confirmation = ConfirmationUi(Money(40000, Currency.GBP), PREVIEW_IBAN, isSubmitting = true),
         ),
@@ -96,7 +96,7 @@ private fun PayoutScreenSubmittingPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun PayoutScreenCompletedPreview() {
-    PreviewPayoutScreen(PayoutUiState.Completed(Money(40000, Currency.GBP)))
+    PreviewPayoutScreen(PayoutContent.Completed(Money(40000, Currency.GBP)))
 }
 
 /** Preview of the insufficient funds failure. */
@@ -104,7 +104,7 @@ private fun PayoutScreenCompletedPreview() {
 @Composable
 private fun PayoutScreenInsufficientFundsPreview() {
     PreviewPayoutScreen(
-        PayoutUiState.Failed(previewForm, PayoutUiState.Failed.Reason.InsufficientFunds),
+        PayoutContent.Failed(previewForm, PayoutContent.Failed.Reason.InsufficientFunds),
     )
 }
 
@@ -113,7 +113,7 @@ private fun PayoutScreenInsufficientFundsPreview() {
 @Composable
 private fun PayoutScreenBiometricCancelledPreview() {
     PreviewPayoutScreen(
-        PayoutUiState.Failed(previewForm, PayoutUiState.Failed.Reason.BiometricCancelled),
+        PayoutContent.Failed(previewForm, PayoutContent.Failed.Reason.BiometricCancelled),
     )
 }
 
@@ -122,7 +122,7 @@ private fun PayoutScreenBiometricCancelledPreview() {
 @Composable
 private fun PayoutScreenBiometricNotEnrolledPreview() {
     PreviewPayoutScreen(
-        PayoutUiState.Failed(previewForm, PayoutUiState.Failed.Reason.BiometricNotEnrolled),
+        PayoutContent.Failed(previewForm, PayoutContent.Failed.Reason.BiometricNotEnrolled),
     )
 }
 
@@ -131,6 +131,6 @@ private fun PayoutScreenBiometricNotEnrolledPreview() {
 @Composable
 private fun PayoutScreenServiceUnavailablePreview() {
     PreviewPayoutScreen(
-        PayoutUiState.Failed(previewForm, PayoutUiState.Failed.Reason.ServiceUnavailable),
+        PayoutContent.Failed(previewForm, PayoutContent.Failed.Reason.ServiceUnavailable),
     )
 }

@@ -135,26 +135,26 @@ fun PayoutScreen(
             .statusBarsPadding()
             .padding(16.dp),
     ) {
-        when (state) {
-            is PayoutUiState.Completed -> {
+        when (val content = state.content) {
+            is PayoutContent.Completed -> {
                 ScreenTitle(stringResource(R.string.payout_result_title))
-                PayoutCompletedContent(state.amount, onCreateAnotherClick)
+                PayoutCompletedContent(content.amount, onCreateAnotherClick)
             }
-            is PayoutUiState.Failed -> {
+            is PayoutContent.Failed -> {
                 BackHandler(onBack = onTryAgainClick)
                 ScreenTitle(stringResource(R.string.payout_result_title))
-                PayoutFailedContent(state.reason, onTryAgainClick, onOpenSettingsClick)
+                PayoutFailedContent(content.reason, onTryAgainClick, onOpenSettingsClick)
             }
-            is PayoutUiState.Editing -> {
+            is PayoutContent.Editing -> {
                 ScreenTitle(stringResource(R.string.payout_title))
                 PayoutForm(
-                    form = state.form,
+                    form = content.form,
                     onAmountChange = onAmountChange,
                     onCurrencyChange = onCurrencyChange,
                     onIbanChange = onIbanChange,
                     onConfirmClick = onConfirmClick,
                 )
-                state.confirmation?.let { confirmation ->
+                content.confirmation?.let { confirmation ->
                     ConfirmPayoutDialog(
                         confirmation = confirmation,
                         onConfirm = onSubmitClick,
