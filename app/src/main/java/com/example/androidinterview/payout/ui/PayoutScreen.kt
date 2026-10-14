@@ -1,6 +1,9 @@
 package com.example.androidinterview.payout.ui
 
+import android.content.Intent
+import android.provider.Settings
 import androidx.activity.compose.BackHandler
+import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,9 +20,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -29,13 +34,17 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.androidinterview.R
 import com.example.androidinterview.money.Currency
 import com.example.androidinterview.payout.ui.components.ConfirmPayoutDialog
 import com.example.androidinterview.payout.ui.components.CurrencyDropdown
 import com.example.androidinterview.payout.ui.components.PayoutCompletedContent
 import com.example.androidinterview.payout.ui.components.PayoutFailedContent
+import kotlinx.coroutines.flow.Flow
 
 private val CURRENCY_FIELD_WIDTH = 140.dp
 
@@ -52,6 +61,7 @@ fun PayoutRoute(
     viewModel: PayoutViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    PayoutEvents(events = viewModel.events)
     PayoutScreen(
         state = state,
         onAmountChange = viewModel::onAmountChange,
@@ -62,8 +72,32 @@ fun PayoutRoute(
         onSubmitClick = viewModel::onSubmitClick,
         onTryAgainClick = viewModel::onTryAgainClick,
         onCreateAnotherClick = viewModel::onCreateAnotherClick,
+        onOpenSettingsClick = viewModel::onOpenSettingsClick,
         modifier = modifier,
     )
+}
+
+/**
+ * Turns the ViewModel's one-shot events into platform actions while the screen is visible.
+ *
+ * @param events One-shot events of the Payout ViewModel.
+ */
+@Composable
+private fun PayoutEvents(events: Flow<PayoutViewModel.Event>) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val context = LocalContext.current
+    LaunchedEffect(events) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            events.collect { event ->
+                when (event) {
+                    PayoutViewModel.Event.OpenBiometricSettings -> context.startActivity(
+                        Intent(Settings.ACTION_BIOMETRIC_ENROLL)
+                            .putExtra(Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED, BIOMETRIC_STRONG),
+                    )
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -78,6 +112,7 @@ fun PayoutRoute(
  * @param onSubmitClick Called when the user confirms in the dialog.
  * @param onTryAgainClick Called when the user taps Try Again on a failure.
  * @param onCreateAnotherClick Called when the user taps Create Another Payout.
+ * @param onOpenSettingsClick Called when the user taps Open Settings to set up a biometric.
  * @param modifier Modifier applied to the screen.
  */
 @Composable
@@ -91,6 +126,7 @@ fun PayoutScreen(
     onSubmitClick: () -> Unit,
     onTryAgainClick: () -> Unit,
     onCreateAnotherClick: () -> Unit,
+    onOpenSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -107,7 +143,7 @@ fun PayoutScreen(
             is PayoutUiState.Failed -> {
                 BackHandler(onBack = onTryAgainClick)
                 ScreenTitle(stringResource(R.string.payout_result_title))
-                PayoutFailedContent(state.reason, onTryAgainClick)
+                PayoutFailedContent(state.reason, onTryAgainClick, onOpenSettingsClick)
             }
             is PayoutUiState.Editing -> {
                 ScreenTitle(stringResource(R.string.payout_title))

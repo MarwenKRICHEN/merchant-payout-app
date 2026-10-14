@@ -34,6 +34,7 @@ private fun PreviewPayoutScreen(state: PayoutUiState) {
             onSubmitClick = {},
             onTryAgainClick = {},
             onCreateAnotherClick = {},
+            onOpenSettingsClick = {},
         )
     }
 }
@@ -104,6 +105,24 @@ private fun PayoutScreenCompletedPreview() {
 private fun PayoutScreenInsufficientFundsPreview() {
     PreviewPayoutScreen(
         PayoutUiState.Failed(previewForm, PayoutUiState.Failed.Reason.InsufficientFunds),
+    )
+}
+
+/** Preview of the dismissed biometric prompt. */
+@Preview(showBackground = true)
+@Composable
+private fun PayoutScreenBiometricCancelledPreview() {
+    PreviewPayoutScreen(
+        PayoutUiState.Failed(previewForm, PayoutUiState.Failed.Reason.BiometricCancelled),
+    )
+}
+
+/** Preview of a device without a biometric set up. */
+@Preview(showBackground = true)
+@Composable
+private fun PayoutScreenBiometricNotEnrolledPreview() {
+    PreviewPayoutScreen(
+        PayoutUiState.Failed(previewForm, PayoutUiState.Failed.Reason.BiometricNotEnrolled),
     )
 }
 

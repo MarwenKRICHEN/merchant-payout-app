@@ -46,6 +46,21 @@ sealed interface PayoutUiState {
             /** The balance does not cover the amount. */
             data object InsufficientFunds : Reason
 
+            /** The user dismissed the biometric prompt. */
+            data object BiometricCancelled : Reason
+
+            /** Biometric authentication is blocked after too many attempts. */
+            data object BiometricLockedOut : Reason
+
+            /** The device has no biometric set up; the user can do it in Settings. */
+            data object BiometricNotEnrolled : Reason
+
+            /** The device cannot authenticate with biometrics. */
+            data object BiometricUnavailable : Reason
+
+            /** Biometric authentication failed. */
+            data object BiometricFailed : Reason
+
             /** Any other failure. */
             data object Unexpected : Reason
         }

@@ -9,9 +9,12 @@ import com.example.androidinterview.payout.domain.IbanValidator
 import com.example.androidinterview.payout.domain.model.PayoutError
 import com.example.androidinterview.payout.domain.model.PayoutResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -33,7 +36,17 @@ class PayoutViewModel @Inject constructor(
     private val amountParser: AmountParser,
 ) : ViewModel() {
 
+    /** One-shot events the UI turns into platform actions. */
+    sealed interface Event {
+        /** Open the system screen where the user enrols a biometric. */
+        data object OpenBiometricSettings : Event
+    }
+
     private val _uiState = MutableStateFlow<PayoutUiState>(PayoutUiState.Editing())
+    private val _events = Channel<Event>()
+
+    /** One-shot events to collect while the UI is visible. */
+    val events: Flow<Event> = _events.receiveAsFlow()
 
     /** Current state of the Payout screen. */
     val uiState: StateFlow<PayoutUiState> = _uiState.asStateFlow()
@@ -118,6 +131,11 @@ class PayoutViewModel @Inject constructor(
         }
     }
 
+    /** The user wants to set up a biometric after being told none is enrolled. */
+    fun onOpenSettingsClick() {
+        viewModelScope.launch { _events.send(Event.OpenBiometricSettings) }
+    }
+
     /** The user wants to send another payout: starts from an empty form. */
     fun onCreateAnotherClick() {
         _uiState.value = PayoutUiState.Editing()
@@ -155,5 +173,10 @@ private fun PayoutError.toReason(): PayoutUiState.Failed.Reason = when (this) {
     PayoutError.Network -> PayoutUiState.Failed.Reason.Network
     PayoutError.InsufficientFunds -> PayoutUiState.Failed.Reason.InsufficientFunds
     PayoutError.ServiceUnavailable -> PayoutUiState.Failed.Reason.ServiceUnavailable
+    PayoutError.AuthenticationCancelled -> PayoutUiState.Failed.Reason.BiometricCancelled
+    PayoutError.AuthenticationLockedOut -> PayoutUiState.Failed.Reason.BiometricLockedOut
+    PayoutError.AuthenticationNotEnrolled -> PayoutUiState.Failed.Reason.BiometricNotEnrolled
+    PayoutError.AuthenticationUnavailable -> PayoutUiState.Failed.Reason.BiometricUnavailable
+    PayoutError.AuthenticationFailed -> PayoutUiState.Failed.Reason.BiometricFailed
     PayoutError.Unknown -> PayoutUiState.Failed.Reason.Unexpected
 }

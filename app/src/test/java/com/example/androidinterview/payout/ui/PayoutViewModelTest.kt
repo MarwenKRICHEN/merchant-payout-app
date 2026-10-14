@@ -2,6 +2,8 @@ package com.example.androidinterview.payout.ui
 
 import com.example.androidinterview.money.Currency
 import com.example.androidinterview.money.Money
+import com.example.androidinterview.authentication.AuthenticationResult
+import com.example.androidinterview.authentication.FakeAuthenticationProvider
 import com.example.androidinterview.core.result.DataError
 import com.example.androidinterview.core.result.DataResult
 import com.example.androidinterview.device.domain.FakeDeviceRepository
@@ -17,6 +19,8 @@ import com.example.androidinterview.payout.domain.model.PayoutStatus
 import com.example.androidinterview.testutil.MainDispatcherRule
 import java.time.Instant
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -41,8 +45,9 @@ class PayoutViewModelTest {
 
     private val repository = FakePayoutRepository(PayoutResult.Success(payout))
     private val deviceRepository = FakeDeviceRepository()
+    private val authenticationProvider = FakeAuthenticationProvider()
     private val viewModel = PayoutViewModel(
-        CreatePayoutUseCase(repository, deviceRepository),
+        CreatePayoutUseCase(repository, deviceRepository, authenticationProvider),
         IbanValidator(),
         AmountParser(),
     )
@@ -211,7 +216,11 @@ class PayoutViewModelTest {
         )
         cases.forEach { (error, reason) ->
             val vm = PayoutViewModel(
-                CreatePayoutUseCase(FakePayoutRepository(PayoutResult.Failure(error)), FakeDeviceRepository()),
+                CreatePayoutUseCase(
+                    FakePayoutRepository(PayoutResult.Failure(error)),
+                    FakeDeviceRepository(),
+                    FakeAuthenticationProvider(),
+                ),
                 IbanValidator(),
                 AmountParser(),
             )
@@ -235,6 +244,46 @@ class PayoutViewModelTest {
 
         assertEquals(PayoutUiState.Failed.Reason.Network, (state as PayoutUiState.Failed).reason)
         assertTrue(repository.requests.isEmpty())
+    }
+
+    @Test
+    fun `a large payout the user did not authenticate fails with the biometric reason and sends nothing`() {
+        val cases = mapOf(
+            AuthenticationResult.Cancelled to PayoutUiState.Failed.Reason.BiometricCancelled,
+            AuthenticationResult.LockedOut to PayoutUiState.Failed.Reason.BiometricLockedOut,
+            AuthenticationResult.NotEnrolled to PayoutUiState.Failed.Reason.BiometricNotEnrolled,
+            AuthenticationResult.Unavailable to PayoutUiState.Failed.Reason.BiometricUnavailable,
+            AuthenticationResult.Failed to PayoutUiState.Failed.Reason.BiometricFailed,
+        )
+        cases.forEach { (outcome, reason) ->
+            authenticationProvider.result = outcome
+            viewModel.onCreateAnotherClick()
+            fillValidForm("1500")
+            viewModel.onConfirmClick()
+
+            viewModel.onSubmitClick()
+
+            assertEquals(reason, (state as PayoutUiState.Failed).reason)
+        }
+        assertTrue(repository.requests.isEmpty())
+    }
+
+    @Test
+    fun `an authenticated large payout completes`() {
+        fillValidForm("1500")
+        viewModel.onConfirmClick()
+
+        viewModel.onSubmitClick()
+
+        assertEquals(1, authenticationProvider.calls)
+        assertTrue(state is PayoutUiState.Completed)
+    }
+
+    @Test
+    fun `open settings sends the settings event`() = runTest {
+        viewModel.onOpenSettingsClick()
+
+        assertEquals(PayoutViewModel.Event.OpenBiometricSettings, viewModel.events.first())
     }
 
     @Test
