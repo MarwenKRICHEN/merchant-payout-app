@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.example.androidinterview.R
 import com.example.androidinterview.money.Money
 import com.example.androidinterview.money.format
-import com.example.androidinterview.payout.ui.PayoutUiState
+import com.example.androidinterview.payout.ui.PayoutContent
 import com.example.androidinterview.ui.theme.Green
 import com.example.androidinterview.ui.theme.Red
 
@@ -132,7 +132,7 @@ fun PayoutCompletedContent(
  */
 @Composable
 fun PayoutFailedContent(
-    reason: PayoutUiState.Failed.Reason,
+    reason: PayoutContent.Failed.Reason,
     onTryAgain: () -> Unit,
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
@@ -145,7 +145,7 @@ fun PayoutFailedContent(
         actionLabel = stringResource(R.string.payout_try_again),
         onAction = onTryAgain,
         modifier = modifier,
-        secondaryActionLabel = if (reason == PayoutUiState.Failed.Reason.BiometricNotEnrolled) {
+        secondaryActionLabel = if (reason == PayoutContent.Failed.Reason.BiometricNotEnrolled) {
             stringResource(R.string.payout_open_settings)
         } else {
             null
@@ -156,14 +156,14 @@ fun PayoutFailedContent(
 
 /** Localised text for this failure reason. */
 @Composable
-private fun PayoutUiState.Failed.Reason.message(): String = when (this) {
-    PayoutUiState.Failed.Reason.Network -> stringResource(R.string.error_network)
-    PayoutUiState.Failed.Reason.ServiceUnavailable -> stringResource(R.string.payout_error_service_unavailable)
-    PayoutUiState.Failed.Reason.InsufficientFunds -> stringResource(R.string.payout_error_insufficient_funds)
-    PayoutUiState.Failed.Reason.BiometricCancelled -> stringResource(R.string.payout_error_biometric_cancelled)
-    PayoutUiState.Failed.Reason.BiometricLockedOut -> stringResource(R.string.payout_error_biometric_locked_out)
-    PayoutUiState.Failed.Reason.BiometricNotEnrolled -> stringResource(R.string.payout_error_biometric_not_enrolled)
-    PayoutUiState.Failed.Reason.BiometricUnavailable -> stringResource(R.string.payout_error_biometric_unavailable)
-    PayoutUiState.Failed.Reason.BiometricFailed -> stringResource(R.string.payout_error_biometric_failed)
-    PayoutUiState.Failed.Reason.Unexpected -> stringResource(R.string.error_unexpected)
+private fun PayoutContent.Failed.Reason.message(): String = when (this) {
+    PayoutContent.Failed.Reason.Network -> stringResource(R.string.error_network)
+    PayoutContent.Failed.Reason.ServiceUnavailable -> stringResource(R.string.payout_error_service_unavailable)
+    PayoutContent.Failed.Reason.InsufficientFunds -> stringResource(R.string.payout_error_insufficient_funds)
+    PayoutContent.Failed.Reason.BiometricCancelled -> stringResource(R.string.payout_error_biometric_cancelled)
+    PayoutContent.Failed.Reason.BiometricLockedOut -> stringResource(R.string.payout_error_biometric_locked_out)
+    PayoutContent.Failed.Reason.BiometricNotEnrolled -> stringResource(R.string.payout_error_biometric_not_enrolled)
+    PayoutContent.Failed.Reason.BiometricUnavailable -> stringResource(R.string.payout_error_biometric_unavailable)
+    PayoutContent.Failed.Reason.BiometricFailed -> stringResource(R.string.payout_error_biometric_failed)
+    PayoutContent.Failed.Reason.Unexpected -> stringResource(R.string.error_unexpected)
 }

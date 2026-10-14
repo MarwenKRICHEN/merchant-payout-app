@@ -4,9 +4,22 @@ import androidx.compose.runtime.Stable
 import com.example.androidinterview.money.Currency
 import com.example.androidinterview.money.Money
 
-/** State of the Payout screen: filling the form, or the result of a payout. */
+/**
+ * State of the Payout screen.
+ *
+ * @param content What the screen shows: the form, or the result of a payout.
+ * @param isScreenshotWarningVisible Whether the reminder shown after a screenshot is open, over any
+ *   content.
+ */
 @Stable
-sealed interface PayoutUiState {
+data class PayoutUiState(
+    val content: PayoutContent = PayoutContent.Editing(),
+    val isScreenshotWarningVisible: Boolean = false,
+)
+
+/** What the Payout screen shows: filling the form, or the result of a payout. */
+@Stable
+sealed interface PayoutContent {
 
     /**
      * The user is filling the form.
@@ -17,14 +30,14 @@ sealed interface PayoutUiState {
     data class Editing(
         val form: PayoutFormUi = PayoutFormUi(),
         val confirmation: ConfirmationUi? = null,
-    ) : PayoutUiState
+    ) : PayoutContent
 
     /**
      * The payout was accepted.
      *
      * @param amount Amount that was sent.
      */
-    data class Completed(val amount: Money) : PayoutUiState
+    data class Completed(val amount: Money) : PayoutContent
 
     /**
      * The payout could not be created.
@@ -32,7 +45,7 @@ sealed interface PayoutUiState {
      * @param form The inputs the user had typed, restored when they try again.
      * @param reason Why; rendered as text by the composable.
      */
-    data class Failed(val form: PayoutFormUi, val reason: Reason) : PayoutUiState {
+    data class Failed(val form: PayoutFormUi, val reason: Reason) : PayoutContent {
 
         /** Why the payout failed. */
         @Stable

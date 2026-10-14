@@ -44,6 +44,9 @@ import com.example.androidinterview.payout.ui.components.ConfirmPayoutDialog
 import com.example.androidinterview.payout.ui.components.CurrencyDropdown
 import com.example.androidinterview.payout.ui.components.PayoutCompletedContent
 import com.example.androidinterview.payout.ui.components.PayoutFailedContent
+import com.example.androidinterview.payout.ui.components.ScreenshotWarningDialog
+import com.example.androidinterview.ui.security.ScreenshotDetectedEffect
+import com.example.androidinterview.ui.security.SecureWindowEffect
 import kotlinx.coroutines.flow.Flow
 
 private val CURRENCY_FIELD_WIDTH = 140.dp
@@ -61,6 +64,8 @@ fun PayoutRoute(
     viewModel: PayoutViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    SecureWindowEffect()
+    ScreenshotDetectedEffect(onScreenshot = viewModel::onScreenshotTaken)
     PayoutEvents(events = viewModel.events)
     PayoutScreen(
         state = state,
@@ -73,6 +78,7 @@ fun PayoutRoute(
         onTryAgainClick = viewModel::onTryAgainClick,
         onCreateAnotherClick = viewModel::onCreateAnotherClick,
         onOpenSettingsClick = viewModel::onOpenSettingsClick,
+        onScreenshotWarningDismiss = viewModel::onScreenshotWarningDismiss,
         modifier = modifier,
     )
 }
@@ -113,6 +119,7 @@ private fun PayoutEvents(events: Flow<PayoutViewModel.Event>) {
  * @param onTryAgainClick Called when the user taps Try Again on a failure.
  * @param onCreateAnotherClick Called when the user taps Create Another Payout.
  * @param onOpenSettingsClick Called when the user taps Open Settings to set up a biometric.
+ * @param onScreenshotWarningDismiss Called when the user acknowledges the screenshot reminder.
  * @param modifier Modifier applied to the screen.
  */
 @Composable
@@ -127,34 +134,38 @@ fun PayoutScreen(
     onTryAgainClick: () -> Unit,
     onCreateAnotherClick: () -> Unit,
     onOpenSettingsClick: () -> Unit,
+    onScreenshotWarningDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    if (state.isScreenshotWarningVisible) {
+        ScreenshotWarningDialog(onDismiss = onScreenshotWarningDismiss)
+    }
     Column(
         modifier = modifier
             .fillMaxSize()
             .statusBarsPadding()
             .padding(16.dp),
     ) {
-        when (state) {
-            is PayoutUiState.Completed -> {
+        when (val content = state.content) {
+            is PayoutContent.Completed -> {
                 ScreenTitle(stringResource(R.string.payout_result_title))
-                PayoutCompletedContent(state.amount, onCreateAnotherClick)
+                PayoutCompletedContent(content.amount, onCreateAnotherClick)
             }
-            is PayoutUiState.Failed -> {
+            is PayoutContent.Failed -> {
                 BackHandler(onBack = onTryAgainClick)
                 ScreenTitle(stringResource(R.string.payout_result_title))
-                PayoutFailedContent(state.reason, onTryAgainClick, onOpenSettingsClick)
+                PayoutFailedContent(content.reason, onTryAgainClick, onOpenSettingsClick)
             }
-            is PayoutUiState.Editing -> {
+            is PayoutContent.Editing -> {
                 ScreenTitle(stringResource(R.string.payout_title))
                 PayoutForm(
-                    form = state.form,
+                    form = content.form,
                     onAmountChange = onAmountChange,
                     onCurrencyChange = onCurrencyChange,
                     onIbanChange = onIbanChange,
                     onConfirmClick = onConfirmClick,
                 )
-                state.confirmation?.let { confirmation ->
+                content.confirmation?.let { confirmation ->
                     ConfirmPayoutDialog(
                         confirmation = confirmation,
                         onConfirm = onSubmitClick,
