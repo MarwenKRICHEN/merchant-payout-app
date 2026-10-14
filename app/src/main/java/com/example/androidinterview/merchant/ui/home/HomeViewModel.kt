@@ -7,9 +7,12 @@ import com.example.androidinterview.core.result.DataResult
 import com.example.androidinterview.merchant.domain.MerchantRepository
 import com.example.androidinterview.merchant.domain.model.Merchant
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -27,12 +30,28 @@ class HomeViewModel @Inject constructor(
     /** Current state of the Home screen. */
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
+    /** One-shot instructions for the UI, each delivered once. */
+    sealed interface Event {
+
+        /** The full activity list should be opened. */
+        data object ShowActivity : Event
+    }
+
+    private val _events = Channel<Event>()
+    /** One-shot events to collect while the UI is visible. */
+    val events: Flow<Event> = _events.receiveAsFlow()
+
     init {
         load()
     }
 
     /** Reloads the merchant overview, e.g. after a failure. */
     fun retry() = load()
+
+    /** The user tapped Show More: asks the UI to open the full activity list. */
+    fun onShowMoreClick() {
+        viewModelScope.launch { _events.send(Event.ShowActivity) }
+    }
 
     /** Emits [HomeUiState.Loading], then the outcome of fetching the merchant. */
     private fun load() {

@@ -12,6 +12,20 @@
     <string name="activity_title">Recent Activity</string>
     <string name="activity_empty">No recent activity</string>
     <string name="activity_show_more">Show More</string>
+    <string name="activity_done">Done</string>
+    <string name="activity_loading_more">Loading more…</string>
+    <string name="activity_today">Today</string>
+    <string name="activity_yesterday">Yesterday</string>
+
+    <string name="activity_type_deposit">Deposit</string>
+    <string name="activity_type_payout">Payout</string>
+    <string name="activity_type_refund">Refund</string>
+    <string name="activity_type_fee">Fee</string>
+
+    <string name="activity_status_completed">Completed</string>
+    <string name="activity_status_pending">Pending</string>
+    <string name="activity_status_processing">Processing</string>
+    <string name="activity_status_failed">Failed</string>
 
     <string name="error_network">Check your connection and try again</string>
     <string name="error_unexpected">Something went wrong. Please try again</string>

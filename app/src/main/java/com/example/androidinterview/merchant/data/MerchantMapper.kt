@@ -5,7 +5,9 @@ import com.example.androidinterview.merchant.data.remote.dto.ActivityStatusDto
 import com.example.androidinterview.merchant.data.remote.dto.ActivityTypeDto
 import com.example.androidinterview.merchant.data.remote.dto.CurrencyDto
 import com.example.androidinterview.merchant.data.remote.dto.MerchantDataResponseDto
+import com.example.androidinterview.merchant.data.remote.dto.PaginatedActivityResponseDto
 import com.example.androidinterview.merchant.domain.model.Activity
+import com.example.androidinterview.merchant.domain.model.ActivityPage
 import com.example.androidinterview.merchant.domain.model.ActivityStatus
 import com.example.androidinterview.merchant.domain.model.ActivityType
 import com.example.androidinterview.merchant.domain.model.Currency
@@ -22,6 +24,12 @@ internal fun MerchantDataResponseDto.toDomain(): Merchant {
         recentActivity = activity.map { it.toDomain() },
     )
 }
+
+/** Maps an activity page; the cursor is dropped when the API reports no more pages. */
+internal fun PaginatedActivityResponseDto.toDomain() = ActivityPage(
+    items = items.map { it.toDomain() },
+    nextCursor = nextCursor.takeIf { hasMore },
+)
 
 /** Maps an API activity item, parsing its ISO 8601 date. */
 internal fun ActivityItemDto.toDomain() = Activity(

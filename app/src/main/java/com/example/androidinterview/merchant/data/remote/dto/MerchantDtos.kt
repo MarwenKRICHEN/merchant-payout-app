@@ -41,6 +41,20 @@ data class ActivityItemDto(
     val status: ActivityStatusDto,
 )
 
+/**
+ * Response of `GET /api/merchant/activity`: one page of activity.
+ *
+ * @param items Activity items of this page, newest first.
+ * @param nextCursor Cursor to request the next page; null on the last page.
+ * @param hasMore Whether more pages are available.
+ */
+@Serializable
+data class PaginatedActivityResponseDto(
+    val items: List<ActivityItemDto>,
+    @SerialName("next_cursor") val nextCursor: String?,
+    @SerialName("has_more") val hasMore: Boolean,
+)
+
 /** Currencies supported by the API. */
 @Serializable
 enum class CurrencyDto { GBP, EUR }
