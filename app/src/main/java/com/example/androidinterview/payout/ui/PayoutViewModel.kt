@@ -133,6 +133,16 @@ class PayoutViewModel @Inject constructor(
         }
     }
 
+    /** The user took a screenshot of the Payout screen: reminds them to keep their data private. */
+    fun onScreenshotTaken() {
+        _uiState.update { it.copy(isScreenshotWarningVisible = true) }
+    }
+
+    /** The user acknowledged the screenshot reminder. */
+    fun onScreenshotWarningDismiss() {
+        _uiState.update { it.copy(isScreenshotWarningVisible = false) }
+    }
+
     /** The user wants to set up a biometric after being told none is enrolled. */
     fun onOpenSettingsClick() {
         viewModelScope.launch { _events.send(Event.OpenBiometricSettings) }

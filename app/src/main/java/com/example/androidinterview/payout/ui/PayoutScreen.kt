@@ -44,6 +44,9 @@ import com.example.androidinterview.payout.ui.components.ConfirmPayoutDialog
 import com.example.androidinterview.payout.ui.components.CurrencyDropdown
 import com.example.androidinterview.payout.ui.components.PayoutCompletedContent
 import com.example.androidinterview.payout.ui.components.PayoutFailedContent
+import com.example.androidinterview.payout.ui.components.ScreenshotWarningDialog
+import com.example.androidinterview.ui.security.ScreenshotDetectedEffect
+import com.example.androidinterview.ui.security.SecureWindowEffect
 import kotlinx.coroutines.flow.Flow
 
 private val CURRENCY_FIELD_WIDTH = 140.dp
@@ -61,6 +64,8 @@ fun PayoutRoute(
     viewModel: PayoutViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    SecureWindowEffect()
+    ScreenshotDetectedEffect(onScreenshot = viewModel::onScreenshotTaken)
     PayoutEvents(events = viewModel.events)
     PayoutScreen(
         state = state,
@@ -73,6 +78,7 @@ fun PayoutRoute(
         onTryAgainClick = viewModel::onTryAgainClick,
         onCreateAnotherClick = viewModel::onCreateAnotherClick,
         onOpenSettingsClick = viewModel::onOpenSettingsClick,
+        onScreenshotWarningDismiss = viewModel::onScreenshotWarningDismiss,
         modifier = modifier,
     )
 }
@@ -113,6 +119,7 @@ private fun PayoutEvents(events: Flow<PayoutViewModel.Event>) {
  * @param onTryAgainClick Called when the user taps Try Again on a failure.
  * @param onCreateAnotherClick Called when the user taps Create Another Payout.
  * @param onOpenSettingsClick Called when the user taps Open Settings to set up a biometric.
+ * @param onScreenshotWarningDismiss Called when the user acknowledges the screenshot reminder.
  * @param modifier Modifier applied to the screen.
  */
 @Composable
@@ -127,8 +134,12 @@ fun PayoutScreen(
     onTryAgainClick: () -> Unit,
     onCreateAnotherClick: () -> Unit,
     onOpenSettingsClick: () -> Unit,
+    onScreenshotWarningDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    if (state.isScreenshotWarningVisible) {
+        ScreenshotWarningDialog(onDismiss = onScreenshotWarningDismiss)
+    }
     Column(
         modifier = modifier
             .fillMaxSize()

@@ -309,4 +309,35 @@ class PayoutViewModelTest {
 
         assertEquals(PayoutContent.Editing(), content)
     }
+
+    @Test
+    fun `a screenshot shows the reminder over the form until it is dismissed`() {
+        fillValidForm()
+        val form = content
+
+        viewModel.onScreenshotTaken()
+        assertTrue(viewModel.uiState.value.isScreenshotWarningVisible)
+        assertEquals(form, content)
+
+        viewModel.onScreenshotWarningDismiss()
+        assertFalse(viewModel.uiState.value.isScreenshotWarningVisible)
+        assertEquals(form, content)
+    }
+
+    @Test
+    fun `a screenshot shows the reminder over a result too`() {
+        fillValidForm()
+        viewModel.onConfirmClick()
+        viewModel.onSubmitClick()
+
+        viewModel.onScreenshotTaken()
+
+        assertTrue(viewModel.uiState.value.isScreenshotWarningVisible)
+        assertTrue(content is PayoutContent.Completed)
+    }
+
+    @Test
+    fun `the reminder is hidden initially`() {
+        assertFalse(viewModel.uiState.value.isScreenshotWarningVisible)
+    }
 }

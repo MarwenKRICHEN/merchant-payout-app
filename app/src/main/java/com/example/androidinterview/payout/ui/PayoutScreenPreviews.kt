@@ -20,12 +20,13 @@ private val previewForm = PayoutFormUi(
  * Renders [PayoutScreen] with no-op callbacks.
  *
  * @param content Content to render.
+ * @param isScreenshotWarningVisible Whether the screenshot reminder is open.
  */
 @Composable
-private fun PreviewPayoutScreen(content: PayoutContent) {
+private fun PreviewPayoutScreen(content: PayoutContent, isScreenshotWarningVisible: Boolean = false) {
     AndroidInterviewTheme {
         PayoutScreen(
-            state = PayoutUiState(content),
+            state = PayoutUiState(content, isScreenshotWarningVisible),
             onAmountChange = {},
             onCurrencyChange = {},
             onIbanChange = {},
@@ -35,6 +36,7 @@ private fun PreviewPayoutScreen(content: PayoutContent) {
             onTryAgainClick = {},
             onCreateAnotherClick = {},
             onOpenSettingsClick = {},
+            onScreenshotWarningDismiss = {},
         )
     }
 }
@@ -44,6 +46,13 @@ private fun PreviewPayoutScreen(content: PayoutContent) {
 @Composable
 private fun PayoutScreenEmptyPreview() {
     PreviewPayoutScreen(PayoutContent.Editing())
+}
+
+/** Preview of the reminder shown after a screenshot. */
+@Preview(showBackground = true)
+@Composable
+private fun PayoutScreenScreenshotWarningPreview() {
+    PreviewPayoutScreen(PayoutContent.Editing(), isScreenshotWarningVisible = true)
 }
 
 /** Preview of a valid form. */

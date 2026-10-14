@@ -8,10 +8,13 @@ import com.example.androidinterview.money.Money
  * State of the Payout screen.
  *
  * @param content What the screen shows: the form, or the result of a payout.
+ * @param isScreenshotWarningVisible Whether the reminder shown after a screenshot is open, over any
+ *   content.
  */
 @Stable
 data class PayoutUiState(
     val content: PayoutContent = PayoutContent.Editing(),
+    val isScreenshotWarningVisible: Boolean = false,
 )
 
 /** What the Payout screen shows: filling the form, or the result of a payout. */

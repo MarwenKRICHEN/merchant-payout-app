@@ -61,6 +61,9 @@
     <string name="payout_error_biometric_unavailable">Biometric authentication is not available on this device.</string>
     <string name="payout_error_biometric_failed">Biometric authentication failed.</string>
     <string name="payout_open_settings">Open Settings</string>
+    <string name="payout_screenshot_warning_title">Security Reminder</string>
+    <string name="payout_screenshot_warning_message">Please keep your financial data private. Screenshots may contain sensitive information.</string>
+    <string name="ok">OK</string>
     <string name="biometric_prompt_title">Biometric Authentication</string>
     <string name="biometric_prompt_subtitle">Authenticate to complete the payout</string>
 </resources>
